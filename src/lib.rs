@@ -145,20 +145,19 @@ impl Form {
             // Get the form's top level fields
             let root_catalog = doc
                 .trailer
-                .get(b"Root");
+                .get(b"Root").unwrap();
 
-            let catalog_result = match root_catalog {
+            let catalog =  root_catalog
+                .as_dict();
+
+            let catalog_result = match catalog {
                 Ok(file) => file,
                 Err(error) => {
                     panic!("Problem : {:?}", error)
                 },
             };
 
-            let catalog =  catalog_result
-                .as_dict()
-                .unwrap();
-
-            let acroform = catalog
+            let acroform = catalog_result
                 .get(b"AcroForm")
                 .unwrap()
                 .as_dict()
