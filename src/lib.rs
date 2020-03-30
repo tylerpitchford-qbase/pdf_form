@@ -147,7 +147,14 @@ impl Form {
                 .trailer
                 .get(b"Root");
 
-            let catalog =  root_catalog
+            let catalog_result = match root_catalog {
+                Ok(file) => file,
+                Err(error) => {
+                    panic!("Problem : {:?}", error)
+                },
+            };
+
+            let catalog =  catalog_result
                 .unwrap()
                 .as_dict()
                 .unwrap();
