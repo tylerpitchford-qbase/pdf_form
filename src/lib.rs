@@ -143,21 +143,9 @@ impl Form {
         // Block so borrow of doc ends before doc is moved into the result
         {
             // Get the form's top level fields
-            let root_catalog = doc
-                .trailer
-                .get(b"Root").unwrap();
-
-            let catalog =  root_catalog
-                .as_dict();
-
-            let catalog_result = match catalog {
-                Ok(file) => file,
-                Err(error) => {
-                    panic!("Problem : {:?}", error)
-                },
-            };
-
-            let acroform = catalog_result
+            let catalog = doc.catalog;
+                
+            let acroform = catalog
                 .get(b"AcroForm")
                 .unwrap()
                 .as_dict()
