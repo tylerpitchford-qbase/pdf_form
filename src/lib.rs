@@ -143,7 +143,7 @@ impl Form {
         // Block so borrow of doc ends before doc is moved into the result
         {
             // Get the form's top level fields
-            let catalog = doc.catalog;
+            let catalog = doc.catalog();
                 
             let acroform = catalog
                 .get(b"AcroForm")
