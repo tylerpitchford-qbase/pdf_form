@@ -126,14 +126,14 @@ impl Form {
     /// Takes a reader containing a PDF with a fillable form, analyzes the content, and attempts to
     /// identify all of the fields the form has.
     pub fn load_from<R: io::Read>(reader: R) -> Result<Self, LoadError> {
-        let doc = Document::load_from(reader)?;
+        let doc = Document::load_from(reader);
         Self::load_doc(doc)
     }
 
     /// Takes a path to a PDF with a fillable form, analyzes the file, and attempts to identify all
     /// of the fields the form has.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self, LoadError> {
-        let doc = Document::load(path)?;
+        let doc = Document::load(path);
         Self::load_doc(doc)
     }
 
@@ -145,19 +145,19 @@ impl Form {
             // Get the form's top level fields
             let catalog = doc
                 .trailer
-                .get("Root")
+                .get(b"Root")
                 .ok_or(LoadError::DictionaryKeyNotFound)?
                 .deref(&doc)?
                 .as_dict()
                 .ok_or(LoadError::UnexpectedType)?;
             let acroform = catalog
-                .get("AcroForm")
+                .get(b"AcroForm")
                 .ok_or(LoadError::DictionaryKeyNotFound)?
                 .deref(&doc)?
                 .as_dict()
                 .ok_or(LoadError::UnexpectedType)?;
             let fields_list = acroform
-                .get("Fields")
+                .get(b"Fields")
                 .ok_or(LoadError::DictionaryKeyNotFound)?
                 //    .deref(&doc)?
                 .as_array()
@@ -169,11 +169,11 @@ impl Form {
                 let obj = objref.deref(&doc)?;
                 if let &Object::Dictionary(ref dict) = obj {
                     // If the field has FT, it actually takes input.  Save this
-                    if let Some(_) = dict.get("FT") {
+                    if let Some(_) = dict.get(b"FT") {
                         form_ids.push(objref.as_reference().unwrap());
                     }
                     // If this field has kids, they might have FT, so add them to the queue
-                    if let Some(&Object::Array(ref kids)) = dict.get("Kids") {
+                    if let Some(&Object::Array(ref kids)) = dict.get(b"Kids") {
                         queue.append(&mut VecDeque::from(kids.clone()));
                     }
                 }
@@ -201,10 +201,10 @@ impl Form {
             .as_dict()
             .unwrap();
         let obj_zero = Object::Integer(0);
-        let type_str = field.get("FT").unwrap().as_name_str().unwrap();
+        let type_str = field.get(b"FT").unwrap().as_name_str().unwrap();
         if type_str == "Btn" {
             let flags = ButtonFlags::from_bits_truncate(
-                field.get("Ff").unwrap_or(&obj_zero).as_i64().unwrap() as u32,
+                field.get(b"Ff").unwrap_or(&obj_zero).as_i64().unwrap() as u32,
             );
             if flags.intersects(ButtonFlags::RADIO | ButtonFlags::NO_TOGGLE_TO_OFF) {
                 FieldType::Radio
@@ -215,7 +215,7 @@ impl Form {
             }
         } else if type_str == "Ch" {
             let flags = ChoiceFlags::from_bits_truncate(
-                field.get("Ff").unwrap_or(&obj_zero).as_i64().unwrap() as u32,
+                field.get(b"Ff").unwrap_or(&obj_zero).as_i64().unwrap() as u32,
             );
             if flags.intersects(ChoiceFlags::COBMO) {
                 FieldType::ComboBox
@@ -242,7 +242,7 @@ impl Form {
             .unwrap();
 
         // The "T" key refers to the name of the field
-        match field.get("T") {
+        match field.get(b"T") {
             Some(Object::String(data, _)) => String::from_utf8(data.clone()).ok(),
             _ => None,
         }
@@ -281,9 +281,9 @@ impl Form {
         match self.get_type(n) {
             FieldType::Button => FieldState::Button,
             FieldType::Radio => FieldState::Radio {
-                selected: match field.get("V") {
+                selected: match field.get(b"V") {
                     Some(name) => name.as_name_str().unwrap().to_owned(),
-                    None => match field.get("AS") {
+                    None => match field.get(b"AS") {
                         Some(name) => name.as_name_str().unwrap().to_owned(),
                         None => "".to_owned(),
                     },
@@ -291,7 +291,7 @@ impl Form {
                 options: self.get_possibilities(self.form_ids[n]),
             },
             FieldType::CheckBox => FieldState::CheckBox {
-                is_checked: match field.get("V") {
+                is_checked: match field.get(b"V") {
                     Some(name) => {
                         if name.as_name_str().unwrap() == "Yes" {
                             true
@@ -299,7 +299,7 @@ impl Form {
                             false
                         }
                     }
-                    None => match field.get("AS") {
+                    None => match field.get(b"AS") {
                         Some(name) => {
                             if name.as_name_str().unwrap() == "Yes" {
                                 true
@@ -314,7 +314,7 @@ impl Form {
             FieldType::ListBox => FieldState::ListBox {
                 // V field in a list box can be either text for one option, an array for many
                 // options, or null
-                selected: match field.get("V") {
+                selected: match field.get(b"V") {
                     Some(selection) => match selection {
                         &Object::String(ref s, StringFormat::Literal) => {
                             vec![str::from_utf8(&s).unwrap().to_owned()]
@@ -334,7 +334,7 @@ impl Form {
                 },
                 // The options is an array of either text elements or arrays where the second
                 // element is what we want
-                options: match field.get("Opt") {
+                options: match field.get(b"Opt") {
                     Some(&Object::Array(ref options)) => options
                         .iter()
                         .map(|x| match x {
@@ -356,7 +356,7 @@ impl Form {
                 },
                 multiselect: {
                     let flags = ChoiceFlags::from_bits_truncate(
-                        field.get("Ff").unwrap_or(&Object::Integer(0)).as_i64().unwrap() as u32,
+                        field.get(b"Ff").unwrap_or(&Object::Integer(0)).as_i64().unwrap() as u32,
                     );
                     flags.intersects(ChoiceFlags::MULTISELECT)
                 },
@@ -364,7 +364,7 @@ impl Form {
             FieldType::ComboBox => FieldState::ComboBox {
                 // V field in a list box can be either text for one option, an array for many
                 // options, or null
-                selected: match field.get("V") {
+                selected: match field.get(b"V") {
                     Some(selection) => match selection {
                         &Object::String(ref s, StringFormat::Literal) => {
                             vec![str::from_utf8(&s).unwrap().to_owned()]
@@ -384,7 +384,7 @@ impl Form {
                 },
                 // The options is an array of either text elements or arrays where the second
                 // element is what we want
-                options: match field.get("Opt") {
+                options: match field.get(b"Opt") {
                     Some(&Object::Array(ref options)) => options
                         .iter()
                         .map(|x| match x {
@@ -406,13 +406,13 @@ impl Form {
                 },
                 editable: {
                     let flags = ChoiceFlags::from_bits_truncate(
-                        field.get("Ff").unwrap_or(&Object::Integer(0)).as_i64().unwrap() as u32,
+                        field.get(b"Ff").unwrap_or(&Object::Integer(0)).as_i64().unwrap() as u32,
                     );
                     flags.intersects(ChoiceFlags::EDIT)
                 },
             },
             FieldType::Text => FieldState::Text {
-                text: match field.get("V") {
+                text: match field.get(b"V") {
                     Some(&Object::String(ref s, StringFormat::Literal)) => {
                         str::from_utf8(&s.clone()).unwrap().to_owned()
                     }
@@ -437,8 +437,8 @@ impl Form {
                     .unwrap()
                     .as_dict_mut()
                     .unwrap();
-                field.set("V", Object::String(s.into_bytes(), StringFormat::Literal));
-                field.remove("AP");
+                field.set(b"V", Object::String(s.into_bytes(), StringFormat::Literal));
+                field.remove(b"AP");
                 Ok(())
             }
             _ => Err(ValueError::TypeMismatch),
@@ -454,15 +454,15 @@ impl Form {
             .unwrap()
             .as_dict()
             .unwrap()
-            .get("Kids");
+            .get(b"Kids");
         if let Some(&Object::Array(ref kids)) = kids_obj {
             for (i, kid) in kids.iter().enumerate() {
                 let mut found = false;
                 if let Some(&Object::Dictionary(ref appearance_states)) =
-                    kid.deref(&self.doc).unwrap().as_dict().unwrap().get("AP")
+                    kid.deref(&self.doc).unwrap().as_dict().unwrap().get(b"AP")
                 {
                     if let Some(&Object::Dictionary(ref normal_appearance)) =
-                        appearance_states.get("N")
+                        appearance_states.get(b"N")
                     {
                         for (key, _) in normal_appearance {
                             if (key != "Off") {
@@ -508,8 +508,8 @@ impl Form {
                     .unwrap()
                     .as_dict_mut()
                     .unwrap();
-                field.set("V", state.clone());
-                field.set("AS", state);
+                field.set(b"V", state.clone());
+                field.set(b"AS", state);
                 Ok(())
             }
             _ => Err(ValueError::TypeMismatch),
@@ -536,7 +536,7 @@ impl Form {
                         .unwrap()
                         .as_dict_mut()
                         .unwrap();
-                    field.set("V", Object::Name(choice.into_bytes()));
+                    field.set(b"V", Object::Name(choice.into_bytes()));
                     Ok(())
                 } else {
                     Err(ValueError::InvalidSelection)
@@ -570,16 +570,16 @@ impl Form {
                             .as_dict_mut()
                             .unwrap();
                         match choices.len() {
-                            0 => field.set("V", Object::Null),
+                            0 => field.set(b"V", Object::Null),
                             1 => field.set(
-                                "V",
+                                b"V",
                                 Object::String(
                                     choices[0].clone().into_bytes(),
                                     StringFormat::Literal,
                                 ),
                             ),
                             _ => field.set(
-                                "V",
+                                b"V",
                                 Object::Array(
                                     choices
                                         .iter()
@@ -624,7 +624,7 @@ impl Form {
                         .as_dict_mut()
                         .unwrap();
                     field.set(
-                        "V",
+                        b"V",
                         Object::String(choice.clone().into_bytes(), StringFormat::Literal),
                     );
                     Ok(())
