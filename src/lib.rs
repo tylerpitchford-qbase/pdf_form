@@ -147,36 +147,31 @@ impl Form {
                 
             let acroform = catalog.get(b"AcroForm");
 
-            let f = match acroform {
-                Ok(file) => file,
-                Err(error) => {
-                    panic!("Problem opening the file: {:?}", error)
-                },
-            };
+            println!("acroform {}", acroform);
             
             //.unwrap();
 
-            let fields_list = f.as_dict().and_then(|dict| dict.get(b"Fields")).unwrap().as_array();
+            let fields_list = acroform.unwrap().as_dict().and_then(|dict| dict.get(b"Fields")).unwrap.as_array();
 
             queue.append(&mut VecDeque::from(fields_list.clone()));
 
-        //     // Iterate over the fields
-        //     while let Some(objref) = queue.pop_front() {
-        //         let obj = objref.deref(&doc)?;
-        //         if let &Object::Dictionary(ref dict) = obj {
-        //             // If the field has FT, it actually takes input.  Save this
-        //             match dict.get(b"FT") {
-        //                 Ok(f) => form_ids.push(objref.as_reference().unwrap()),
-        //                 _ => (),
-        //             }
-        //             // If this field has kids, they might have FT, so add them to the queue
-        //             match dict.get(b"Kids") {
-        //                 Ok(f) => queue.append(&mut VecDeque::from(f.clone().as_array().unwrap().clone())),
-        //                 _ => (),
-        //             }
-        //         }
-        //     }
-        // }
+            // Iterate over the fields
+            while let Some(objref) = queue.pop_front() {
+                let obj = objref.deref(&doc)?;
+                if let &Object::Dictionary(ref dict) = obj {
+                    // If the field has FT, it actually takes input.  Save this
+                    match dict.get(b"FT") {
+                        Ok(f) => form_ids.push(objref.as_reference().unwrap()),
+                        _ => (),
+                    }
+                    // If this field has kids, they might have FT, so add them to the queue
+                    match dict.get(b"Kids") {
+                        Ok(f) => queue.append(&mut VecDeque::from(f.clone().as_array().unwrap().clone())),
+                        _ => (),
+                    }
+                }
+            }
+        }
         Ok(Form { doc, form_ids })
     }
 
