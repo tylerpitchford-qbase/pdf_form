@@ -171,7 +171,7 @@ impl Form {
                     }
                     // If this field has kids, they might have FT, so add them to the queue
                     match dict.get(b"Kids") {
-                        Ok(f) => queue.append(&mut VecDeque::from(&Object::Array(ref f)),
+                        Ok(f) => queue.append(&mut VecDeque::from(&Object::Array(ref f))),
                     }
                 }
             }
