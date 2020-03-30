@@ -147,7 +147,7 @@ impl Form {
                 
             let acroform = catalog.get(b"AcroForm");
 
-            println!(format!("acroform {}", acroform.unwrap()));
+            println!("Now {:?} will print!", acroform.unwrap());
             
             //.unwrap();
 
