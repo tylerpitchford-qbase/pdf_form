@@ -146,7 +146,6 @@ impl Form {
             let catalog = doc
                 .trailer
                 .get(b"Root")
-                .ok_or(LoadError::DictionaryKeyNotFound)?
                 .deref(&doc)?
                 .as_dict()
                 .ok_or(LoadError::UnexpectedType)?;
