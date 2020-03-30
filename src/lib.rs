@@ -168,10 +168,12 @@ impl Form {
                     // If the field has FT, it actually takes input.  Save this
                     match dict.get(b"FT") {
                         Ok(f) => form_ids.push(objref.as_reference().unwrap()),
+                        _ => None,
                     }
                     // If this field has kids, they might have FT, so add them to the queue
                     match dict.get(b"Kids") {
-                        Ok(f) => queue.append(&mut VecDeque::from(kids.clone())),
+                        Ok(f) => queue.append(&mut VecDeque::from(f.clone())),
+                        _ => None,
                     }
                 }
             }
@@ -240,7 +242,7 @@ impl Form {
 
         // The "T" key refers to the name of the field
         match field.get(b"T") {
-            Some(Object::String(data, _)) => String::from_utf8(data.clone()).ok(),
+            Ok(data) => String::from_utf8(data.clone()).ok(),
             _ => None,
         }
     }
@@ -279,10 +281,20 @@ impl Form {
             FieldType::Button => FieldState::Button,
             FieldType::Radio => FieldState::Radio {
                 selected: match field.get(b"V") {
-                    Some(name) => name.as_name_str().unwrap().to_owned(),
-                    None => match field.get(b"AS") {
-                        Some(name) => name.as_name_str().unwrap().to_owned(),
-                        None => "".to_owned(),
+                    Ok(name) => { 
+                        if name == None { 
+                            match field.get(b"AS") {
+                                Ok(nested_name) => {
+                                    if nested_name == None { 
+                                        "".to_owned()
+                                    } else {
+                                        nested_name.as_name_str().unwrap().to_owned()
+                                    }
+                                } 
+                            }
+                        } else {
+                            name.as_name_str().unwrap().to_owned();
+                        }
                     },
                 },
                 options: self.get_possibilities(self.form_ids[n]),
