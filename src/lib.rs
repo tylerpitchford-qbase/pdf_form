@@ -145,7 +145,14 @@ impl Form {
             // Get the form's top level fields
             let catalog = doc.catalog().unwrap();
                 
-            let acroform = catalog.get(b"AcroForm").and_then(Object::as_dict).unwrap();
+            let acroform = catalog.get(b"AcroForm").and_then(Object::as_dict);
+
+            match acroform {
+                Ok(f) => f,
+                Err(e) => panic!("Problem: {:?}", e),
+            }
+            
+            //.unwrap();
 
             let fields_list = acroform.get(b"Fields").and_then(Object::as_array).unwrap();
 
