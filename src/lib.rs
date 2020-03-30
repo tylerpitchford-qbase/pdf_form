@@ -240,7 +240,7 @@ impl Form {
 
         // The "T" key refers to the name of the field
         match field.get(b"T") {
-            Ok(data) => data.clone().as_name_str().unwrap().to_string(),
+            Ok(data) => Some(data.clone().as_name_str().unwrap().to_string()),
             _ => None,
         }
     }
