@@ -147,7 +147,7 @@ impl Form {
                 .trailer
                 .get(b"Root");
 
-            root_catalog
+            let catalog =  root_catalog
                 .unwrap()
                 .as_dict()
                 .unwrap();
