@@ -168,11 +168,11 @@ impl Form {
                 let obj = objref.deref(&doc)?;
                 if let &Object::Dictionary(ref dict) = obj {
                     // If the field has FT, it actually takes input.  Save this
-                    if dict.get(b"FT") {
+                    match dict.get(b"FT") {
                         Ok(f) => form_ids.push(objref.as_reference().unwrap());
                     }
                     // If this field has kids, they might have FT, so add them to the queue
-                    if dict.get(b"Kids") {
+                    match dict.get(b"Kids") {
                         Ok(f) => queue.append(&mut VecDeque::from(kids.clone()));;
                     }
                 }
