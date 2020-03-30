@@ -155,7 +155,6 @@ impl Form {
             };
 
             let catalog =  catalog_result
-                .unwrap()
                 .as_dict()
                 .unwrap();
 
