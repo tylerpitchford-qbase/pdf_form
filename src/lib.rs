@@ -145,7 +145,7 @@ impl Form {
             // Get the form's top level fields
             let catalog = doc.catalog().unwrap();
                 
-            let acroform = catalog.get(b"AcroForm").and_then(Object::as_reference).and_then(|id| self.get_dictionary(id).unwrap();
+            let acroform = catalog.get(b"AcroForm").and_then(Object::as_reference).and_then(|id| catalog.get_dictionary(id).unwrap();
 
             let fields_list = acroform
                 .get(b"Fields")
