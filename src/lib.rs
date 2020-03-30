@@ -148,7 +148,7 @@ impl Form {
                 .get(b"Root")
                 .unwrap()
                 .as_dict()
-                .ok_or(LoadError::UnexpectedType)?;
+                .unwrap();
             let acroform = catalog
                 .get(b"AcroForm")
                 .ok_or(LoadError::DictionaryKeyNotFound)?
@@ -168,12 +168,12 @@ impl Form {
                 let obj = objref.deref(&doc)?;
                 if let &Object::Dictionary(ref dict) = obj {
                     // If the field has FT, it actually takes input.  Save this
-                    if let Some(_) = dict.get(b"FT") {
-                        form_ids.push(objref.as_reference().unwrap());
+                    if dict.get(b"FT") {
+                        Ok(f) => form_ids.push(objref.as_reference().unwrap());
                     }
                     // If this field has kids, they might have FT, so add them to the queue
-                    if let Some(&Object::Array(ref kids)) = dict.get(b"Kids") {
-                        queue.append(&mut VecDeque::from(kids.clone()));
+                    if dict.get(b"Kids") {
+                        Ok(f) => queue.append(&mut VecDeque::from(kids.clone()));;
                     }
                 }
             }
