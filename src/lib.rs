@@ -151,16 +151,14 @@ impl Form {
                 .unwrap();
             let acroform = catalog
                 .get(b"AcroForm")
-                .ok_or(LoadError::DictionaryKeyNotFound)?
-                .deref(&doc)?
+                .unwrap()
                 .as_dict()
-                .ok_or(LoadError::UnexpectedType)?;
+                .unwrap();
             let fields_list = acroform
                 .get(b"Fields")
-                .ok_or(LoadError::DictionaryKeyNotFound)?
-                //    .deref(&doc)?
+                .unwrap()
                 .as_array()
-                .ok_or(LoadError::UnexpectedType)?;
+                .unwrap();
             queue.append(&mut VecDeque::from(fields_list.clone()));
 
             // Iterate over the fields
@@ -169,11 +167,11 @@ impl Form {
                 if let &Object::Dictionary(ref dict) = obj {
                     // If the field has FT, it actually takes input.  Save this
                     match dict.get(b"FT") {
-                        Ok(f) => form_ids.push(objref.as_reference().unwrap());
+                        Ok(f) => form_ids.push(objref.as_reference().unwrap()),
                     }
                     // If this field has kids, they might have FT, so add them to the queue
                     match dict.get(b"Kids") {
-                        Ok(f) => queue.append(&mut VecDeque::from(kids.clone()));;
+                        Ok(f) => queue.append(&mut VecDeque::from(kids.clone())),
                     }
                 }
             }
