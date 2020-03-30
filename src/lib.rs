@@ -147,10 +147,12 @@ impl Form {
                 
             let acroform = catalog.get(b"AcroForm").and_then(Object::as_dict);
 
-            match acroform {
-                Ok(f) => f,
-                Err(e) => panic!("Problem: {:?}", e),
-            }
+            let f = match acroform {
+                Ok(file) => file,
+                Err(error) => {
+                    panic!("Problem opening the file: {:?}", error)
+                },
+            };
             
             //.unwrap();
 
