@@ -143,22 +143,27 @@ impl Form {
         // Block so borrow of doc ends before doc is moved into the result
         {
             // Get the form's top level fields
-            let catalog = doc
+            let root_catalog = doc
                 .trailer
-                .get(b"Root")
+                .get(b"Root");
+
+            root_catalog
                 .unwrap()
                 .as_dict()
                 .unwrap();
+
             let acroform = catalog
                 .get(b"AcroForm")
                 .unwrap()
                 .as_dict()
                 .unwrap();
+
             let fields_list = acroform
                 .get(b"Fields")
                 .unwrap()
                 .as_array()
                 .unwrap();
+
             queue.append(&mut VecDeque::from(fields_list.clone()));
 
             // Iterate over the fields
