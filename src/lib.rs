@@ -156,7 +156,7 @@ impl Form {
             
             //.unwrap();
 
-            let fields_list = f.get(b"Fields").and_then(Object::as_array).unwrap();
+            let fields_list = f.as_dict().get(b"Fields").and_then(Object::as_array).unwrap();
 
             queue.append(&mut VecDeque::from(fields_list.clone()));
 
