@@ -147,11 +147,11 @@ impl Form {
                 
             let acroform = catalog.get(b"AcroForm");
 
-            println!("acroform {}", acroform);
+            println!("acroform {}", acroform.unwrap());
             
             //.unwrap();
 
-            let fields_list = acroform.unwrap().as_dict().unwrap().get(b"Fields").unwrap().as_array();
+            let fields_list = acroform.unwrap().as_dict().unwrap().get(b"Fields").unwrap().as_array().unwrap();
 
             queue.append(&mut VecDeque::from(fields_list.clone()));
 
