@@ -145,7 +145,7 @@ impl Form {
             // Get the form's top level fields
             let catalog = doc.catalog().unwrap();
                 
-            let acroform = catalog.get_deref(b"AcroForm",doc).unwrap();
+            let acroform = catalog.get_deref(b"AcroForm",&doc).unwrap();
 
             println!("Now {:?} will print!", acroform);
             
