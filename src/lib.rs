@@ -146,7 +146,7 @@ impl Form {
             let catalog = doc
                 .trailer
                 .get(b"Root")
-                .deref(&doc)?
+                .unwarp()
                 .as_dict()
                 .ok_or(LoadError::UnexpectedType)?;
             let acroform = catalog
