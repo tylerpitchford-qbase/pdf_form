@@ -240,7 +240,7 @@ impl Form {
 
         // The "T" key refers to the name of the field
         match field.get(b"T") {
-            Ok(data) => String::from_utf8(data.clone()).ok(),
+            Ok(data) => data.clone().as_name_str().unwrap_or("boom."),
             _ => None,
         }
     }
@@ -278,7 +278,7 @@ impl Form {
                     .unwrap()
                     .as_dict_mut()
                     .unwrap();
-                field.set(b"V", Object::String(s.into_bytes(), StringFormat::Literal));
+                field.set(b"V", s.into_bytes());
                 field.remove(b"AP");
                 Ok(())
             }
