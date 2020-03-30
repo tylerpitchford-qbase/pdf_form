@@ -168,10 +168,12 @@ impl Form {
                     // If the field has FT, it actually takes input.  Save this
                     match dict.get(b"FT") {
                         Ok(f) => form_ids.push(objref.as_reference().unwrap()),
+                        _ => (),
                     }
                     // If this field has kids, they might have FT, so add them to the queue
                     match dict.get(b"Kids") {
                         Ok(f) => queue.append(&mut VecDeque::from(f.clone().as_array().unwrap().clone())),
+                        _ => (),
                     }
                 }
             }
