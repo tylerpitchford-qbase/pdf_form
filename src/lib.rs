@@ -145,13 +145,9 @@ impl Form {
             // Get the form's top level fields
             let catalog = doc.catalog().unwrap();
                 
-            let acroform = catalog.get(b"AcroForm").and_then(Object::as_dict).ok();
+            let acroform = catalog.get(b"AcroForm").and_then(Object::as_dict).unwrap();
 
-            let fields_list = acroform
-                .get(b"Fields")
-                .unwrap()
-                .as_array()
-                .unwrap();
+            let fields_list = acroform.get(b"Fields").and_then(Object::as_array).unwrap();
 
             queue.append(&mut VecDeque::from(fields_list.clone()));
 
