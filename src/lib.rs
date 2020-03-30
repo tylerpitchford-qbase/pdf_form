@@ -151,7 +151,7 @@ impl Form {
             
             //.unwrap();
 
-            let fields_list = acroform.unwrap().as_dict().get(b"Fields").unwrap().as_array();
+            let fields_list = acroform.unwrap().as_dict().unwrap().get(b"Fields").unwrap().as_array();
 
             queue.append(&mut VecDeque::from(fields_list.clone()));
 
