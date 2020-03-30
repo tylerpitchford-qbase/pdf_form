@@ -126,14 +126,14 @@ impl Form {
     /// Takes a reader containing a PDF with a fillable form, analyzes the content, and attempts to
     /// identify all of the fields the form has.
     pub fn load_from<R: io::Read>(reader: R) -> Result<Self, LoadError> {
-        let doc = Document::load_from(reader);
+        let doc = Document::load_from(reader).unwrap();
         Self::load_doc(doc)
     }
 
     /// Takes a path to a PDF with a fillable form, analyzes the file, and attempts to identify all
     /// of the fields the form has.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self, LoadError> {
-        let doc = Document::load(path);
+        let doc = Document::load(path).unwrap();
         Self::load_doc(doc)
     }
 
