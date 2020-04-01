@@ -285,7 +285,7 @@ impl Form {
     pub fn set_check_box(&mut self, n: usize, is_checked: bool) -> Result<(),ValueError> {
         match self.get_type(n) {
             FieldType::CheckBox => {
-                let state = Object::Name({if is_checked {"Yes"} else {"Off"}}.to_owned().into_bytes());
+                let state = Object::Name({if is_checked {"On"} else {"Off"}}.to_owned().into_bytes());
                 let field = self.doc.objects.get_mut(&self.form_ids[n]).unwrap().as_dict_mut().unwrap();
                 field.set("V",state.clone());
                 field.set("AS",state);
